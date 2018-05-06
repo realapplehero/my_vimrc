@@ -8,8 +8,6 @@ nnoremap <Space> za
 nnoremap <Tab> gt
 nnoremap <S-Tab> gT
 
-"map <F1> <ESC>:NERDTreeToggle<CR>
-map <F12> <ESC>:NERDTreeToggle<CR>
 
 map <F2> <ESC>:TagbarToggle<CR>
 map <F3> <ESC>:CtrlP<CR>
@@ -25,6 +23,8 @@ map <F9> <ESC>:SyntasticToggleMode<CR>
 " map <F10> <ESC>:IndentGuidesToggle<CR>
 " map <F10> <ESC>:IndentLinesToggle<CR>
 map <F10> <ESC>:GundoToggle<CR>
+
+map <F12> <ESC>:NERDTreeToggle<CR>
 
 " ======== Function ========
 
@@ -140,7 +140,7 @@ endfunction
 set autoindent
 set number
 set cursorline
-set tabstop=4
+set tabstop=40
 set softtabstop=4
 set shiftwidth=4
 set hlsearch
@@ -184,7 +184,8 @@ autocmd BufRead * normal zz
 " C
 autocmd FileType c setlocal foldmethod=expr foldexpr=FoldFunction() foldlevel=1 foldcolumn=4 foldnestmax=1 tabstop=4 tags+=./tags,~/.vim/tags/c
 autocmd BufNewFile,BufRead *.h set filetype=header
-autocmd FileType header setlocal syntax=doxygen
+" autocmd FileType header setlocal syntax=doxygen
+autocmd FileType header setlocal syntax=c
 
 " Shell Script
 autocmd FileType sh,rc setlocal foldmethod=expr foldexpr=FoldFunction() foldlevel=0 foldcolumn=4 foldnestmax=1 syntax=sh
@@ -309,7 +310,6 @@ Bundle 'vim-airline/vim-airline'
 Bundle 'vim-airline/vim-airline-themes'
 set laststatus=2
 set t_Co=256
-" set encoding=utf8
 let g:airline_theme='badwolf'
 let g:airline_powerline_fonts=1
 let g:airline#extensions#default#layout = [
@@ -329,12 +329,12 @@ let g:airline#extensions#tabline#show_close_button = 0
 let g:airline#extensions#tabline#exclude_preview = 0
 
 " Modify the seperator
-" let g:airline#extensions#tabline#left_sep = ' '
-" let g:airline#extensions#tabline#left_alt_sep = '|'
-" let g:airline_left_sep = ' '
-" let g:airline_left_alt_sep = '|'
-" let g:airline_right_sep = ' '
-" let g:airline_right_alt_sep = '|'
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+let g:airline_left_sep = ' '
+let g:airline_left_alt_sep = '|'
+let g:airline_right_sep = ' '
+let g:airline_right_alt_sep = '|'
 
 " lightline-vim
 "Bundle 'itchyny/lightline.vim'
@@ -538,7 +538,7 @@ Bundle 'vim-utils/vim-man'
 set keywordprg=:Man
 
 " Screen Saver
-Bundle 'uguu-org/vim-matrix-screensaver'
+" Bundle 'uguu-org/vim-matrix-screensaver'
 
 " Funny Game
 Bundle "johngrib/vim-game-code-break"
@@ -547,7 +547,11 @@ Bundle "johngrib/vim-game-code-break"
 
 Bundle "derekwyatt/vim-scala"
 
-highlight LineNr cterm=None ctermfg=grey ctermbg=black
-highlight CursorLineNr cterm=bold ctermbg=blue
+" Something wrong !
+" Bundle 'godlygeek/tabular'
+" Bundle 'plasticboy/vim-markdown'
+
+highlight LineNr cterm=None ctermfg=grey ctermbg=black guifg=grey guibg=black
+highlight CursorLineNr cterm=bold ctermbg=blue guibg=blue
 
 
