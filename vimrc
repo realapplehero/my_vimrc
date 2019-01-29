@@ -21,8 +21,8 @@ map <F8> <ESC>:Gdiff<CR>
 map <F9> <ESC>:SyntasticToggleMode<CR>
 
 " map <F10> <ESC>:IndentGuidesToggle<CR>
-" map <F10> <ESC>:IndentLinesToggle<CR>
-map <F10> <ESC>:GundoToggle<CR>
+map <F10> <ESC>:IndentLinesToggle<CR>
+" map <F10> <ESC>:GundoToggle<CR>
 
 map <F12> <ESC>:NERDTreeToggle<CR>
 
@@ -212,6 +212,9 @@ autocmd BufNewFile,BufRead *.scala,*.sc set filetype=scala
 " SQL
 autocmd FileType sql setlocal foldmethod=indent foldlevel=10 foldcolumn=4 foldnestmax=2
 
+" HiveQL
+autocmd BufNewFile,BufRead *.hql set filetype=hive
+
 " ======== Plugin ========
 
 " -------- 1. Plugin Management --------
@@ -314,7 +317,7 @@ let g:airline_theme='badwolf'
 let g:airline_powerline_fonts=1
 let g:airline#extensions#default#layout = [
     \ ['a', 'b', 'c'],
-    \ ['y', 'z']
+    \ ['x', 'y', 'z']
     \]
 " let g:airline_section_z = airline#section#create(['%3p%%', ' %{g:airline_symbols.linenr}  ', '%l : %c'])
 let g:airline_section_z = airline#section#create(['%3p%%', ' | ', '%l : %c'])
@@ -323,7 +326,7 @@ let g:airline_section_z = airline#section#create(['%3p%%', ' | ', '%l : %c'])
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#fnamemod = ':t'
 let g:airline#extensions#tabline#show_splits = 0
-let g:airline#extensions#tabline#show_tab_nr = 1
+let g:airline#extensions#tabline#show_tab_nr = 0
 let g:airline#extensions#tabline#tab_nr_type = 1
 let g:airline#extensions#tabline#show_close_button = 0
 let g:airline#extensions#tabline#exclude_preview = 0
@@ -395,7 +398,7 @@ Bundle 'artur-shaik/vim-javacomplete2'
 autocmd FileType java setlocal omnifunc=javacomplete#Complete
 " autocmd FileType java setlocal omnifunc=javacomplete#Complete completefunc=javacomplete#CompleteParamsInf
 
-let g:JavaComplete_LibsPath = 'C:\Program Files\Java\jdk1.8.0_131\src'
+" let g:JavaComplete_LibsPath = 'C:\Program Files\Java\jdk1.8.0_131\src'
 " let g:JavaComplete_UseFQN = 1
 " let g:JavaComplete_JavaviDebug = 1
 " let g:JavaComplete_JavaviLogfileDirectory = '~/.javacomplete2_serverlog'
@@ -496,8 +499,8 @@ Bundle 'vim-scripts/DoxygenToolkit.vim'
 "
 Bundle "edkolev/promptline.vim"
 let g:promptline_preset = {
-    \'a' : [ '\u' ],
-    \'b' : [ '\w' ],
+    \'a' : [ '\u', '\h' ],
+    \'b' : [ promptline#slices#cwd() ],
     \'c' : [ promptline#slices#vcs_branch(), '$(git rev-parse --short HEAD 2>/dev/null)', promptline#slices#git_status() ],
     \'warn' : [ promptline#slices#python_virtualenv(), promptline#slices#last_exit_code() ]
 \}
@@ -554,4 +557,9 @@ Bundle "derekwyatt/vim-scala"
 highlight LineNr cterm=None ctermfg=grey ctermbg=black guifg=grey guibg=black
 highlight CursorLineNr cterm=bold ctermbg=blue guibg=blue
 
+Bundle 'junegunn/vim-easy-align'
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap ga <Plug>(EasyAlign)
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(EasyAlign)
 
