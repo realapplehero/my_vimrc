@@ -8,21 +8,22 @@ nnoremap <Space> za
 nnoremap <Tab> gt
 nnoremap <S-Tab> gT
 
+" <F1> reserved for help document of vim
 map <F2> <ESC>:TagbarToggle<CR>
 map <F3> <ESC>:CtrlP<CR>
-map <F4> <ESC>:CtrlSF  
+map <F4> <ESC>:CtrlSF
 
 map <F5> <ESC>:Gitv<CR>
 map <F6> <ESC>:Gblame<CR>
-map <F7> <ESC>:Gstatus<CR>
-map <F8> <ESC>:Gdiff<CR>
+map <F7> <ESC>:Gvdiff<CR>
+map <F8> <ESC>:UndotreeToggle<CR>
 
 map <F9> <ESC>:SyntasticToggleMode<CR>
 map <F10> <ESC>:IndentLinesToggle<CR>
-
+" <F11> reserved for help document of terminator
 map <F12> <ESC>:NERDTreeToggle<CR>
 
-let mapleader = ','
+let mapleader = ';'
 
 " ======== Function ========
 
@@ -131,7 +132,11 @@ set tabstop=40
 set softtabstop=4
 set shiftwidth=4
 set hlsearch
+set listchars=tab:→\ ,eol:↲,nbsp:␣,trail:•,extends:⟩,precedes:⟨
 colorscheme koehler
+
+hi Nontext ctermfg=grey guifg=grey
+hi SpecialKey ctermfg=grey guifg=grey
 
 " Exclude some files
 let g:ExcludedFileExtension = '\v\.(exe|so|dll|pyc|zip|tar|tar.gz|tar.xz|tar.bz2|class|doc|png|jpg|jpeg)$'
@@ -162,6 +167,9 @@ if has('gui_running')
         endif
 endif
 
+" Show trailing space after file is written
+autocmd BufWritePost * call ShowTrailingSpace()
+
 " Get the cursor position of the previous exit
 autocmd BufReadPost *
     \ if line("'\"") > 0 && line("'\"") <= line("$") |
@@ -176,13 +184,13 @@ autocmd BufNewFile,BufRead *.h set filetype=header
 autocmd FileType header setlocal syntax=c
 
 " Shell Script
-autocmd FileType sh,rc setlocal foldmethod=expr foldexpr=FoldFunction() foldlevel=0 foldcolumn=4 foldnestmax=1 syntax=sh
+autocmd FileType sh,rc setlocal foldmethod=expr foldexpr=FoldFunction() foldlevel=10 foldcolumn=4 foldnestmax=1 syntax=sh
 
 " Python
 autocmd FileType python setlocal foldmethod=indent foldlevel=10 foldcolumn=4 foldnestmax=2 tags+=./tags,~/.vim/tags/python_3_5.tags,~/.vim/tags/python_3_5_pip.tags
 
 " Java
-autocmd FileType java setlocal foldmethod=expr foldexpr=FoldFunction() foldlevel=2 foldcolumn=4 foldnestmax=2 tags+=./tags,~/.vim/tags/java_1.8.0
+autocmd FileType java setlocal foldmethod=expr foldexpr=FoldFunction() foldlevel=2 foldcolumn=4 foldnestmax=2 tags+=./tags,~/.vim/tags/java_1_8_0.tags
 
 " HTML
 autocmd FileType html setlocal foldmethod=indent foldlevel=4 foldcolumn=8 foldnestmax=8
@@ -250,14 +258,17 @@ let g:ctrlp_extensions = ['buffertag', 'tag', 'line', 'dir']
 " Show beautiful code structure
 Bundle 'majutsushi/tagbar'
 let g:tagbar_sort = 0
-" let g:tagbar_autofocus = 1
-let g:tagbar_autoclose = 1
+let g:tagbar_autofocus = 1
+" let g:tagbar_autoclose = 1
 let g:tagbar_iconchars = ['▸', '▾']
 let g:tagbar_left = 1
 
 " Set hot key to jump to/from tag
 nnoremap <C-Right> :call MyTargbarShowTag()<CR>
 nnoremap <C-Left> <C-t>
+
+" Show structure of h1~h6 in markdown file in tagbar
+Bundle 'lvht/tagbar-markdown'
 
 " -------- 4. Syntax/Style/Format Check Framework --------
 " { syntastic }
@@ -277,7 +288,7 @@ let g:syntastic_warning_symbol='⚠'
 let g:syntastic_style_error_symbol = '✗'
 let g:syntastic_style_warning_symbol = '⚠'
 
-" checkers
+" checkers (https://github.com/vim-syntastic/syntastic/wiki/Syntax-Checkers)
 let g:syntastic_c_checkers = ['gcc', 'splint']
 let g:syntastic_sh_checkers = ['sh', 'shellcheck']
 let g:syntastic_python_checkers = ['python', 'pylint', 'pep8']
@@ -285,6 +296,7 @@ let g:syntastic_java_checkers = ['javac']
 let g:syntastic_html_checkers = ['tidy']
 let g:syntastic_css_checkers = ['csslint']
 let g:syntastic_javascript_checkers = ['eslint']
+let g:syntastic_json_checkers = ['jsonlint']
 
 " -------- 5. Key Word Search --------
 " { ctrlsf } and { vim-man }
@@ -299,8 +311,8 @@ vmap <C-w> <Plug>CtrlSFVwordExec
 
 " Show man page for key word
 Bundle 'vim-utils/vim-man'
-" nmap <leader>m <Plug>(Man) 
-nmap <C-m> <Plug>(Man)
+" nmap <leader>m <Plug>(Man)
+nmap <C-M> <Plug>(Man)
 
 " -------- 6. Status/Tab Line --------
 " { airline } and { promptline } and { startify }
@@ -324,7 +336,7 @@ let g:airline_section_z = airline#section#create(['%3p%%', ' | ', '%l : %c'])
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#fnamemod = ':t'
 let g:airline#extensions#tabline#show_splits = 0
-let g:airline#extensions#tabline#show_tab_nr = 0
+let g:airline#extensions#tabline#show_tab_nr = 1
 let g:airline#extensions#tabline#tab_nr_type = 1
 let g:airline#extensions#tabline#show_close_button = 0
 let g:airline#extensions#tabline#exclude_preview = 0
@@ -484,9 +496,35 @@ let g:javascript_enable_domhtmlcss = 1
 " Auto launch web browser to show the markdown file
 Bundle 'suan/vim-instant-markdown'
 
+" Produce the Table of Content by h1~h6 of markdown file
+Bundle 'mzlogin/vim-markdown-toc'
+let g:vmt_auto_update_on_save = 0
+
 " Show screensaver
 Bundle 'uguu-org/vim-matrix-screensaver'
 
 highlight LineNr cterm=None ctermfg=grey ctermbg=black guifg=grey guibg=black
 highlight CursorLineNr cterm=bold ctermbg=blue guibg=blue
+highlight Cursor ctermbg=blue guibg=blue
+
+" Support reStructuredText
+Bundle 'Rykka/riv.vim'
+Bundle 'gu-fan/InstantRst'
+autocmd BufNewFile,BufRead *.rst InstantRst
+let project1 = {'path': '~/vimriv/project1',}
+let g:riv_projects = [project1]
+
+" Write wiki in vim
+Bundle 'vimwiki/vimwiki'
+
+" Switch between paired files defined on .projection.json in the sample project
+Bundle 'tpope/vim-dispatch'
+Bundle 'tpope/vim-projectionist'
+
+" Highlight docker file
+Bundle 'ekalinin/Dockerfile.vim'
+
+" ======== Test ========
+
+Bundle 'mbbill/undotree'
 
