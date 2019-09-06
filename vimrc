@@ -72,13 +72,13 @@ endfunction
 function! AddFunctionDoc()
     " Check the cursor is in the line of function
     let l:cursorLine = getline('.')
+    " TODO: the signature of function may have multiple lines
     let l:paramString = matchstr(l:cursorLine, '(.*)')
-    " TODO: Exclude other case like for(), while(), switch() ...
     if l:paramString == ''
         echoerr '[Error]: The cursor is NOT in the line of function declaration.'
         return ''
     else
-        let l:funcString = matchstr(l:cursorLine, '[[:alpha:]]*[[:blank:]]*(')
+        let l:funcString = matchstr(l:cursorLine, '[_[:alpha:]]*[[:blank:]]*(')
         let l:funcName = substitute(l:funcString, '[ (]', '', 'g')
         if l:funcName == '' || l:funcName == 'for' || l:funcName == 'while' || l:funcName == 'if' || l:funcName == 'switch' || l:funcName == 'catch'
             echoerr '[Error]: The cursor is NOT in the line of function declaration.'
@@ -92,34 +92,57 @@ function! AddFunctionDoc()
     " Create the document string
     let l:ft = &filetype
     if l:ft == 'javascript' || l:ft == 'java' || l:ft =='c' || l:ft == 'html'
+        " Javadoc style
+        " FIXME: the star char will cause some wrong indent in command
+        "        exec 'normal O' . line
         let l:startDocBlock = '/**'
-        let l:innerDocBlock = ' *'
-        let l:endDocBlock = ' */'
-        let l:tagList = [' @brief:', '']
+        let l:innerDocBlock = '\* '
+        let l:endDocBlock = '\*/'
+        let l:tagList = ['@brief', '']
         for param in l:paramList
-            let l:tagList = l:tagList + [' @param ' . param . ':', '']
+            let l:tagList += ['@param ' . param]
         endfor
-        let l:tagList = l:tagList + [' @return:', '']
+        let l:tagList += ['', '@return']
     elseif l:ft == 'sh'
         let l:startDocBlock = '##'
         let l:innerDocBlock = '#'
         let l:endDocBlock = '# '
         let l:tagList = ['  input: ', '', ' output: ']
+    elseif l:ft == 'python'
+        " FIXME: the space char will cause some wrong indent in command
+        "        exec 'normal o' . line
+        let l:startDocBlock = '"""' . l:funcName
+        let l:innerDocBlock = ''
+        let l:endDocBlock = '"""'
+        let l:tagList = ['\n', 'Parameters']
+        for param in l:paramList
+            let l:tagList += ['==> ' . param]
+        endfor
+        let l:tagList += ['\n', 'Returns', '==> <retval>']
     else
-        echoerr '[Error]: Only support filetype in [c, java, javascript, sh]'
+        echoerr '[Error]: Only support filetype in [c, java, javascript, sh, python]'
         return ''
     endif
 
-    let l:docContent = [ l:startDocBlock ]
+    " Combine the final content of comments
+    let l:docContent = [l:startDocBlock]
     for line in l:tagList
-        let l:docContent += [ l:innerDocBlock . line ]
+        let l:docContent += [ l:innerDocBlock . line]
     endfor
-    let l:docContent += [ l:endDocBlock ]
-    let l:docList = reverse(l:docContent)
+    let l:docContent += [l:endDocBlock]
 
-    for item in l:docList
-        exec 'normal O' . item
-    endfor
+    " Write the content of comments above/below function declaration line
+    if l:ft == 'python'
+        for line in l:docContent
+            exec 'normal! o' . line
+        endfor
+        startinsert!
+    else
+        for line in reverse(l:docContent)
+            exec 'normal! O' . line
+        endfor
+        " startinsert!
+    endif
 
 endfunction
 
@@ -435,7 +458,7 @@ Bundle 'airblade/vim-gitgutter'
 Bundle 'Xuyuanp/nerdtree-git-plugin'
 
 " -------- 9. Highlight/Format Code Block Indent --------
-" { indentLine } and { vim-prettier }
+" { indentLine } and {vim-autoformat} and { vim-prettier }
 "
 
 " Show vertical line in every code block indent
@@ -447,10 +470,18 @@ let g:indentLine_color_dark = 1
 let g:indentLine_char = '¦'
 let g:indentLine_enabled = 0
 
-" Auto change the code block indent
-Bundle 'prettier/vim-prettier'
-let g:prettier#autoformat = 0
-let g:prettier#config#tab_width = 4
+" Auto change the code indent by defined style for C/C++/Java/Python
+Bundle 'Chiel92/vim-autoformat'
+let g:autoformat_verbosemode = 1
+let g:formatdef_clangformat = '"clang-format -"'
+let g:formatters_c = ['clangformat']
+let g:formatdef_autopep8 = '"autopep8 -"'
+let g:formatters_python = ['autopep8']
+
+" Auto change the code indent by defined style for Javascript/HTML/CSS/JSON
+ Bundle 'prettier/vim-prettier'
+ let g:prettier#autoformat = 0
+ let g:prettier#config#tab_width = 4
 
 " -------- 10. Handle these Paired Signs --------
 " { auto-pairs } and { vim-surround } and { matchtag }
@@ -527,4 +558,3 @@ Bundle 'ekalinin/Dockerfile.vim'
 " ======== Test ========
 
 Bundle 'mbbill/undotree'
-
