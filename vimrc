@@ -150,8 +150,10 @@ endfunction
 
 set autoindent
 set number
+" set relativenumber
 set cursorline
-set tabstop=40
+set cursorcolumn
+set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 set hlsearch
@@ -275,7 +277,7 @@ let g:ctrlp_custom_ignore = {
 let g:ctrlp_extensions = ['buffertag', 'tag', 'line', 'dir']
 
 " -------- 3. Code Structure Analysis --------
-" { tagbar }
+" { tagbar } and { tagbar-markdown } and { vim-gutentags }
 "
 
 " Show beautiful code structure
@@ -293,6 +295,19 @@ nnoremap <C-Left> <C-t>
 " Show structure of h1~h6 in markdown file in tagbar
 Bundle 'lvht/tagbar-markdown'
 
+" Auto generate tags file
+Bundle 'ludovicchabant/vim-gutentags'
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
+let g:gutentags_ctags_tagfile = '.tags'
+let s:vim_tags = expand('~/.cache/tags')
+let g:gutentags_cache_dir = s:vim_tags
+if !isdirectory(s:vim_tags)
+   silent! call mkdir(s:vim_tags, 'p')
+endif
+" let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+" let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
+" let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+
 " -------- 4. Syntax/Style/Format Check Framework --------
 " { syntastic }
 "
@@ -306,17 +321,19 @@ set statusline+=%*
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
+let g:syntastic_loc_list_height = 5
 let g:syntastic_error_symbol='✗'
 let g:syntastic_warning_symbol='⚠'
 let g:syntastic_style_error_symbol = '✗'
 let g:syntastic_style_warning_symbol = '⚠'
 
 " checkers (https://github.com/vim-syntastic/syntastic/wiki/Syntax-Checkers)
-let g:syntastic_c_checkers = ['gcc', 'splint']
-let g:syntastic_sh_checkers = ['sh', 'shellcheck']
-let g:syntastic_python_checkers = ['python', 'pylint', 'pep8']
+let g:syntastic_c_checkers = ['splint']
+let g:syntastic_sh_checkers = ['shellcheck']
+let g:syntastic_python_checkers = ['pylint']
 let g:syntastic_java_checkers = ['javac']
-let g:syntastic_html_checkers = ['tidy']
+" let g:syntastic_html_checkers = ['tidy']
+let g:syntastic_html_checkers = ['eslint']
 let g:syntastic_css_checkers = ['csslint']
 let g:syntastic_javascript_checkers = ['eslint']
 let g:syntastic_json_checkers = ['jsonlint']
@@ -335,7 +352,7 @@ vmap <C-w> <Plug>CtrlSFVwordExec
 " Show man page for key word
 Bundle 'vim-utils/vim-man'
 " nmap <leader>m <Plug>(Man)
-nmap <C-M> <Plug>(Man)
+nmap <C-a> <Plug>(Man)
 
 " -------- 6. Status/Tab Line --------
 " { airline } and { promptline } and { startify }
@@ -452,7 +469,7 @@ cabbrev git Git
 
 " Show add/remove/modify sign in left column
 Bundle 'airblade/vim-gitgutter'
-" set updatetime=250
+set updatetime=2000
 
 " Show git status in nerdtree
 Bundle 'Xuyuanp/nerdtree-git-plugin'
@@ -470,18 +487,41 @@ let g:indentLine_color_dark = 1
 let g:indentLine_char = '¦'
 let g:indentLine_enabled = 0
 
-" Auto change the code indent by defined style for C/C++/Java/Python
+" Auto change the code indent by defined style
+" for C/C++/Java/Python/Javascript/JSON/HTML/CSS/SQL
 Bundle 'Chiel92/vim-autoformat'
 let g:autoformat_verbosemode = 1
-let g:formatdef_clangformat = '"clang-format -"'
-let g:formatters_c = ['clangformat']
+
+" C/C++/Java
+let g:formatdef_clang_format = '"clang-format -"'
+let g:formatters_c = ['clang_format']
+
+" Python
 let g:formatdef_autopep8 = '"autopep8 -"'
-let g:formatters_python = ['autopep8']
+let g:formatdef_isort = '"isort -"'
+" let g:formatters_python = ['isort', 'autopep8']
+
+" SQL
+let g:formatdef_sqlformat = '"sqlformat --keywords upper -"'
+let g:formatters_sql = ['sqlformat']
+
+" Javascript/JSON
+let g:formatdef_js_beautify = '"js-beautify -"'
+let g:formatters_javascript = ['js_beautify']
+let g:formatters_json = ['js_beautify']
+
+" HTML
+let g:formatdef_html_beautify = '"html-beautify -"'
+let g:formatters_html = ['html_beautify']
+
+" CSS
+let g:formatdef_css_beautify = '"css-beautify -"'
+let g:formatters_css = ['css_beautify']
 
 " Auto change the code indent by defined style for Javascript/HTML/CSS/JSON
- Bundle 'prettier/vim-prettier'
- let g:prettier#autoformat = 0
- let g:prettier#config#tab_width = 4
+ " Bundle 'prettier/vim-prettier'
+ " let g:prettier#autoformat = 0
+ " let g:prettier#config#tab_width = 4
 
 " -------- 10. Handle these Paired Signs --------
 " { auto-pairs } and { vim-surround } and { matchtag }
@@ -497,11 +537,15 @@ Bundle 'tpope/vim-surround'
 Bundle 'gregsexton/matchtag'
 
 " -------- 11. Code Comment --------
-" { vim-commentary }
+" { vim-commentary } and { vim-pydocstring }
 "
 
 " Comment/Decomment lines
 Bundle 'tpope/vim-commentary'
+
+" Auto add python docstring
+Bundle 'heavenshell/vim-pydocstring'
+let g:pydocstring_templates_dir = '~/conf/vim/pydocstring/templates/google'
 
 " -------- 12. Customization for Language or Filetype --------
 
@@ -557,4 +601,3 @@ Bundle 'ekalinin/Dockerfile.vim'
 
 " ======== Test ========
 
-Bundle 'mbbill/undotree'
