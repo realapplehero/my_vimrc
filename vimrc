@@ -12,12 +12,10 @@ nnoremap <S-Tab> gT
 map <F2> <ESC>:TagbarToggle<CR>
 map <F3> <ESC>:CtrlP<CR>
 map <F4> <ESC>:CtrlSF
-
 map <F5> <ESC>:Gitv<CR>
 map <F6> <ESC>:Gblame<CR>
 map <F7> <ESC>:Gvdiff<CR>
 map <F8> <ESC>:UndotreeToggle<CR>
-
 map <F9> <ESC>:SyntasticToggleMode<CR>
 map <F10> <ESC>:IndentLinesToggle<CR>
 " <F11> reserved for help document of terminator
@@ -69,32 +67,37 @@ function! MyTargbarShowTag()
     exec ':tj ' . wordOnCursor
 endfunction
 
+function! MyManPage()
+    let l:wordOnCursor = expand('<cword>')
+    exec ':Man ' . wordOnCursor
+endfunction
+
 function! AddFunctionDoc()
-    " Check the cursor is in the line of function
-    let l:cursorLine = getline('.')
-    " TODO: the signature of function may have multiple lines
-    let l:paramString = matchstr(l:cursorLine, '(.*)')
-    if l:paramString == ''
-        echoerr '[Error]: The cursor is NOT in the line of function declaration.'
-        return ''
-    else
-        let l:funcString = matchstr(l:cursorLine, '[_[:alpha:]]*[[:blank:]]*(')
-        let l:funcName = substitute(l:funcString, '[ (]', '', 'g')
-        if l:funcName == '' || l:funcName == 'for' || l:funcName == 'while' || l:funcName == 'if' || l:funcName == 'switch' || l:funcName == 'catch'
-            echoerr '[Error]: The cursor is NOT in the line of function declaration.'
-            return ''
-        endif
-    endif
+" Check the cursor is in the line of function
+let l:cursorLine = getline('.')
+" TODO: the signature of function may have multiple lines
+let l:paramString = matchstr(l:cursorLine, '(.*)')
+if l:paramString == ''
+echoerr '[Error]: The cursor is NOT in the line of function declaration.'
+return ''
+else
+let l:funcString = matchstr(l:cursorLine, '[_[:alpha:]]*[[:blank:]]*(')
+let l:funcName = substitute(l:funcString, '[ (]', '', 'g')
+if l:funcName == '' || l:funcName == 'for' || l:funcName == 'while' || l:funcName == 'if' || l:funcName == 'switch' || l:funcName == 'catch'
+echoerr '[Error]: The cursor is NOT in the line of function declaration.'
+return ''
+endif
+endif
 
-    " Transfer function parameter string to list
-    let l:paramList = split(substitute(l:paramString, '[()]', '', 'g'), '[[:blank:]]*,[[:blank:]]*')
+" Transfer function parameter string to list
+let l:paramList = split(substitute(l:paramString, '[()]', '', 'g'), '[[:blank:]]*,[[:blank:]]*')
 
-    " Create the document string
-    let l:ft = &filetype
-    if l:ft == 'javascript' || l:ft == 'java' || l:ft =='c' || l:ft == 'html'
-        " Javadoc style
-        " FIXME: the star char will cause some wrong indent in command
-        "        exec 'normal O' . line
+" Create the document string
+let l:ft = &filetype
+if l:ft == 'javascript' || l:ft == 'java' || l:ft =='c' || l:ft == 'html'
+" Javadoc style
+" FIXME: the star char will cause some wrong indent in command
+"        exec 'normal O' . line
         let l:startDocBlock = '/**'
         let l:innerDocBlock = '\* '
         let l:endDocBlock = '\*/'
@@ -107,7 +110,7 @@ function! AddFunctionDoc()
         let l:startDocBlock = '##'
         let l:innerDocBlock = '#'
         let l:endDocBlock = '# '
-        let l:tagList = ['  input: ', '', ' output: ']
+        let l:tagList = ['  Input: ', '', ' Output: ']
     elseif l:ft == 'python'
         " FIXME: the space char will cause some wrong indent in command
         "        exec 'normal o' . line
@@ -153,12 +156,19 @@ set number
 " set relativenumber
 set cursorline
 set cursorcolumn
-set tabstop=4
+set tabstop=40
 set softtabstop=4
 set shiftwidth=4
 set hlsearch
 set listchars=tab:→\ ,eol:↲,nbsp:␣,trail:•,extends:⟩,precedes:⟨
+set laststatus=2
+set t_Co=256
 colorscheme koehler
+" set cmdheight=4
+
+" autocomplete dropdown list colorscheme
+hi Pmenu ctermfg=black ctermbg=lightred guifg=black guibg=lightred
+hi PmenuSel ctermfg=white ctermbg=lightgreen guifg=white guibg=lightgreen
 
 hi Nontext ctermfg=grey guifg=grey
 hi SpecialKey ctermfg=grey guifg=grey
@@ -215,7 +225,7 @@ autocmd FileType sh,rc setlocal foldmethod=expr foldexpr=FoldFunction() foldleve
 autocmd FileType python setlocal foldmethod=indent foldlevel=10 foldcolumn=4 foldnestmax=2 tags+=./tags,~/.vim/tags/python_3_5.tags,~/.vim/tags/python_3_5_pip.tags
 
 " Java
-autocmd FileType java setlocal foldmethod=expr foldexpr=FoldFunction() foldlevel=2 foldcolumn=4 foldnestmax=2 tags+=./tags,~/.vim/tags/java_1_8_0.tags
+autocmd FileType java setlocal foldmethod=indent foldlevel=2 foldcolumn=4 foldnestmax=2 tags+=./tags,~/.vim/tags/java_1_8_0.tags
 
 " HTML
 autocmd FileType html setlocal foldmethod=indent foldlevel=4 foldcolumn=8 foldnestmax=8
@@ -321,7 +331,7 @@ set statusline+=%*
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
-let g:syntastic_loc_list_height = 5
+let g:syntastic_loc_list_height = 3
 let g:syntastic_error_symbol='✗'
 let g:syntastic_warning_symbol='⚠'
 let g:syntastic_style_error_symbol = '✗'
@@ -332,7 +342,6 @@ let g:syntastic_c_checkers = ['splint']
 let g:syntastic_sh_checkers = ['shellcheck']
 let g:syntastic_python_checkers = ['pylint']
 let g:syntastic_java_checkers = ['javac']
-" let g:syntastic_html_checkers = ['tidy']
 let g:syntastic_html_checkers = ['eslint']
 let g:syntastic_css_checkers = ['csslint']
 let g:syntastic_javascript_checkers = ['eslint']
@@ -347,12 +356,11 @@ Bundle 'dyng/ctrlsf.vim'
 let g:ctrlsf_extra_backend_args = {
     \ 'ag': '--ignore tags'
     \}
-vmap <C-w> <Plug>CtrlSFVwordExec
+vnoremap <C-w> <Plug>CtrlSFVwordExec
 
 " Show man page for key word
 Bundle 'vim-utils/vim-man'
-" nmap <leader>m <Plug>(Man)
-nmap <C-a> <Plug>(Man)
+nnoremap <C-m> :call MyManPage()<CR>
 
 " -------- 6. Status/Tab Line --------
 " { airline } and { promptline } and { startify }
@@ -361,8 +369,6 @@ nmap <C-a> <Plug>(Man)
 " Show beautiful status/tab line
 Bundle 'vim-airline/vim-airline'
 Bundle 'vim-airline/vim-airline-themes'
-set laststatus=2
-set t_Co=256
 let g:airline_theme='badwolf'
 let g:airline_powerline_fonts=1
 let g:airline#extensions#default#layout = [
@@ -409,15 +415,21 @@ let g:startify_custom_header =  map(split(system('echo TOUGH GUYS use VIM | cows
 " Auto Completion
 if v:version >= 704
     Bundle 'Valloric/YouCompleteMe'
-    let g:ycm_key_list_select_completion = ['<c-n>', '<Down>']
-    let g:ycm_key_list_previous_completion = ['<c-p>', '<Up>']
     let g:ycm_show_diagnostics_ui = 0
-    " let g:ycm_semantic_triggers =  {
-    " \   'javascript': ['.'],
-    " \ }
-
-    " Original (for C++)
-    " let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py'
+    let g:ycm_min_num_of_chars_for_completion = 2
+    let g:ycm_key_invoke_completion = '<C-q>'
+    let g:ycm_semantic_triggers =  {
+    \   'c': ['->', '.', 're\w{2}'],
+    \   'objc': ['->', '.', 're!\[[_a-zA-Z]+\w*\s', 're!^\s*[^\W\d]\w*\s', 're!\[.*\]\s'],
+    \   'ocaml': ['.', '#'],
+    \   'cpp,cuda,objcpp': ['->', '.', '::'],
+    \   'perl': ['->'],
+    \   'php': ['->', '::'],
+    \   'cs,d,elixir,go,groovy,java,javascript,julia,perl6,python,scala,typescript,vb': ['.'],
+    \   'ruby,rust': ['.', '::'],
+    \   'lua': ['.', ':'],
+    \   'erlang': [':'],
+    \ }
 
     " Customized (for C)
     let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/myself/ycm_extra_conf_c.py'
@@ -427,16 +439,16 @@ if v:version >= 704
 endif
 
 " Auto Completion for Java
-Bundle 'artur-shaik/vim-javacomplete2'
-autocmd FileType java setlocal omnifunc=javacomplete#Complete
+" Bundle 'artur-shaik/vim-javacomplete2'
+" autocmd FileType java setlocal omnifunc=javacomplete#Complete
 " autocmd FileType java setlocal omnifunc=javacomplete#Complete completefunc=javacomplete#CompleteParamsInf
-" let g:JavaComplete_LibsPath = 'C:\Program Files\Java\jdk1.8.0_131\src'
+
 " let g:JavaComplete_UseFQN = 1
 " let g:JavaComplete_JavaviDebug = 1
 " let g:JavaComplete_JavaviLogfileDirectory = '~/.javacomplete2_serverlog'
 
 " Auto Completion for Javascript
-Bundle 'ternjs/tern_for_vim'
+" Bundle 'ternjs/tern_for_vim'
 " let g:tern_show_signature_in_pum = 1
 
 " Auto completion of code snippet
@@ -469,6 +481,7 @@ cabbrev git Git
 
 " Show add/remove/modify sign in left column
 Bundle 'airblade/vim-gitgutter'
+let g:gitgutter_max_signs=1000
 set updatetime=2000
 
 " Show git status in nerdtree
@@ -499,10 +512,10 @@ let g:formatters_c = ['clang_format']
 " Python
 let g:formatdef_autopep8 = '"autopep8 -"'
 let g:formatdef_isort = '"isort -"'
-" let g:formatters_python = ['isort', 'autopep8']
+let g:formatters_python = ['isort', 'autopep8']
 
 " SQL
-let g:formatdef_sqlformat = '"sqlformat --keywords upper -"'
+let g:formatdef_sqlformat = '"sqlformat --reindent --indent_width 4 --indent_columns --keywords upper --identifiers lower -"'
 let g:formatters_sql = ['sqlformat']
 
 " Javascript/JSON
@@ -524,7 +537,7 @@ let g:formatters_css = ['css_beautify']
  " let g:prettier#config#tab_width = 4
 
 " -------- 10. Handle these Paired Signs --------
-" { auto-pairs } and { vim-surround } and { matchtag }
+" { auto-pairs } and { vim-surround, vim-repeat } and { matchtag }
 "
 
 " Auto complete the paired signs
@@ -533,11 +546,14 @@ Bundle 'jiangmiao/auto-pairs'
 " Fast modify the paired signs
 Bundle 'tpope/vim-surround'
 
+" Extend the repeat function (char .) for vim-surround
+Bundle 'tpope/vim-repeat'
+
 " Highlight the paired HTML tag
 Bundle 'gregsexton/matchtag'
 
 " -------- 11. Code Comment --------
-" { vim-commentary } and { vim-pydocstring }
+" { vim-commentary } and { vim-pydocstring } and { vim-table-mode }
 "
 
 " Comment/Decomment lines
@@ -545,7 +561,12 @@ Bundle 'tpope/vim-commentary'
 
 " Auto add python docstring
 Bundle 'heavenshell/vim-pydocstring'
-let g:pydocstring_templates_dir = '~/conf/vim/pydocstring/templates/google'
+let g:pydocstring_templates_dir = '~/conf/vim/vim-pydocstring/templates/google'
+
+" Tableize data
+Bundle 'dhruvasagar/vim-table-mode'
+let g:table_mode_corner_corner='+'
+let g:table_mode_header_fillchar='='
 
 " -------- 12. Customization for Language or Filetype --------
 
@@ -578,10 +599,6 @@ let g:vmt_auto_update_on_save = 0
 " Show screensaver
 Bundle 'uguu-org/vim-matrix-screensaver'
 
-highlight LineNr cterm=None ctermfg=grey ctermbg=black guifg=grey guibg=black
-highlight CursorLineNr cterm=bold ctermbg=blue guibg=blue
-highlight Cursor ctermbg=blue guibg=blue
-
 " Support reStructuredText
 Bundle 'Rykka/riv.vim'
 Bundle 'gu-fan/InstantRst'
@@ -599,5 +616,10 @@ Bundle 'tpope/vim-projectionist'
 " Highlight docker file
 Bundle 'ekalinin/Dockerfile.vim'
 
+highlight LineNr cterm=None ctermfg=grey ctermbg=black guifg=grey guibg=black
+highlight CursorLineNr cterm=bold ctermbg=blue guibg=blue
+highlight Cursor ctermbg=blue guibg=blue
+
 " ======== Test ========
+Bundle 'sheerun/vim-polyglot'
 
