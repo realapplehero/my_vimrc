@@ -25,7 +25,7 @@ let mapleader = ';'
 
 " ======== Function ========
 
-" For C/ShellScript/Java/JavaScript
+" For C/ShellScript
 " To fold the first two level code sections if match below indent format:
 " class foo
 " {
@@ -183,6 +183,11 @@ source $VIMRUNTIME/delmenu.vim
 source $VIMRUNTIME/menu.vim
 language messages zh_TW.utf-8
 
+" Set fg/bg colors
+highlight LineNr cterm=None ctermfg=grey ctermbg=black guifg=grey guibg=black
+highlight CursorLineNr cterm=bold ctermbg=blue guibg=blue
+highlight Cursor ctermbg=blue guibg=blue
+
 if has('gui_running')
     if has('gui_gtk2') " Linux with GNOME
         set guifont=Droid\ Sans\ Mono\ for\ Powerline\ Nerd\ Font\ 16
@@ -225,7 +230,7 @@ autocmd FileType sh,rc setlocal foldmethod=expr foldexpr=FoldFunction() foldleve
 autocmd FileType python setlocal foldmethod=indent foldlevel=10 foldcolumn=4 foldnestmax=2 tags+=./tags,~/.vim/tags/python_3_5.tags,~/.vim/tags/python_3_5_pip.tags
 
 " Java
-autocmd FileType java setlocal foldmethod=indent foldlevel=2 foldcolumn=4 foldnestmax=2 tags+=./tags,~/.vim/tags/java_1_8_0.tags
+autocmd FileType java setlocal foldmethod=indent foldlevel=2 foldcolumn=4 foldnestmax=2 tags+=./tags,~/.vim/tags/java_1_8_0.tags makeprg=javac\ %
 
 " HTML
 autocmd FileType html setlocal foldmethod=indent foldlevel=4 foldcolumn=8 foldnestmax=8
@@ -234,7 +239,7 @@ autocmd FileType html setlocal foldmethod=indent foldlevel=4 foldcolumn=8 foldne
 autocmd FileType css setlocal foldmethod=marker foldmarker={,} foldlevel=0 foldcolumn=4 foldnestmax=1
 
 " JavaScript
-autocmd FileType javascript setlocal foldmethod=expr foldexpr=FoldFunction() foldlevel=1 foldcolumn=4 foldnestmax=2
+autocmd FileType javascript setlocal foldmethod=indent foldlevel=2 foldcolumn=4 foldnestmax=2
 
 " Scala
 autocmd BufNewFile,BufRead *.scala,*.sc set filetype=scala
@@ -409,7 +414,7 @@ Bundle 'mhinz/vim-startify'
 let g:startify_custom_header =  map(split(system('echo TOUGH GUYS use VIM | cowsay'), '\n'), '"   ". v:val')
 
 " -------- 7. Auto Completion --------
-" { YouCompleteMe } and { vim-javacomplete2 } and { tern_for_vim } and { ultisnips }
+" { YouCompleteMe } and { ultisnips }
 "
 
 " Auto Completion
@@ -437,19 +442,6 @@ if v:version >= 704
     let g:ycm_server_keep_logfiles = 1
     let g:ycm_serverlog_level = 'debug'
 endif
-
-" Auto Completion for Java
-" Bundle 'artur-shaik/vim-javacomplete2'
-" autocmd FileType java setlocal omnifunc=javacomplete#Complete
-" autocmd FileType java setlocal omnifunc=javacomplete#Complete completefunc=javacomplete#CompleteParamsInf
-
-" let g:JavaComplete_UseFQN = 1
-" let g:JavaComplete_JavaviDebug = 1
-" let g:JavaComplete_JavaviLogfileDirectory = '~/.javacomplete2_serverlog'
-
-" Auto Completion for Javascript
-" Bundle 'ternjs/tern_for_vim'
-" let g:tern_show_signature_in_pum = 1
 
 " Auto completion of code snippet
 if v:version >= 704
@@ -488,7 +480,7 @@ set updatetime=2000
 Bundle 'Xuyuanp/nerdtree-git-plugin'
 
 " -------- 9. Highlight/Format Code Block Indent --------
-" { indentLine } and {vim-autoformat} and { vim-prettier }
+" { indentLine } and { vim-autoformat } and { tabular } and { vim-cursorword } and { vim-interestingwords }
 "
 
 " Show vertical line in every code block indent
@@ -501,13 +493,17 @@ let g:indentLine_char = '¦'
 let g:indentLine_enabled = 0
 
 " Auto change the code indent by defined style
-" for C/C++/Java/Python/Javascript/JSON/HTML/CSS/SQL
+" for C/Java/Python/Javascript/JSON/HTML/CSS/SQL
 Bundle 'Chiel92/vim-autoformat'
 let g:autoformat_verbosemode = 1
 
-" C/C++/Java
+" C
 let g:formatdef_clang_format = '"clang-format -"'
 let g:formatters_c = ['clang_format']
+
+" Java
+let g:formatdef_java_format = '"astyle --options=.astylerc"'
+let g:formatters_java = ['java_format']
 
 " Python
 let g:formatdef_autopep8 = '"autopep8 -"'
@@ -531,10 +527,14 @@ let g:formatters_html = ['html_beautify']
 let g:formatdef_css_beautify = '"css-beautify -"'
 let g:formatters_css = ['css_beautify']
 
-" Auto change the code indent by defined style for Javascript/HTML/CSS/JSON
- " Bundle 'prettier/vim-prettier'
- " let g:prettier#autoformat = 0
- " let g:prettier#config#tab_width = 4
+" Modify the aligned format of key-value
+Bundle 'godlygeek/tabular'
+
+" Auto underline the word of the cursor
+Bundle 'itchyny/vim-cursorword'
+
+" Highlight the word of the cursor at most 6 background colors
+Bundle 'lfv89/vim-interestingwords'
 
 " -------- 10. Handle these Paired Signs --------
 " { auto-pairs } and { vim-surround, vim-repeat } and { matchtag }
@@ -608,6 +608,7 @@ let g:riv_projects = [project1]
 
 " Write wiki in vim
 Bundle 'vimwiki/vimwiki'
+" let g:vimwiki_list = [{'path': '~/vimwiki/', 'syntax': 'markdown', 'ext': '.md'}]
 
 " Switch between paired files defined on .projection.json in the sample project
 Bundle 'tpope/vim-dispatch'
@@ -616,10 +617,5 @@ Bundle 'tpope/vim-projectionist'
 " Highlight docker file
 Bundle 'ekalinin/Dockerfile.vim'
 
-highlight LineNr cterm=None ctermfg=grey ctermbg=black guifg=grey guibg=black
-highlight CursorLineNr cterm=bold ctermbg=blue guibg=blue
-highlight Cursor ctermbg=blue guibg=blue
-
 " ======== Test ========
 Bundle 'sheerun/vim-polyglot'
-
